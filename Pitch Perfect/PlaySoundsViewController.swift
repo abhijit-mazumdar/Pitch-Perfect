@@ -31,11 +31,14 @@ class PlaySoundsViewController: UIViewController {
     
 
     @IBAction func playDarthvaderAudio(sender: UIButton) {
+        stopAllAudio()
+        audioPlayer.currentTime = 0.0
         playAudioWithVariablePitch(-1000)
     }
     
     @IBAction func playSlowAudio(sender: UIButton) {
-        audioPlayer.stop()
+        stopAllAudio()
+        audioPlayer.currentTime = 0.0
         audioPlayer.rate=0.5
         audioPlayer.play()
     }
@@ -50,25 +53,30 @@ class PlaySoundsViewController: UIViewController {
     */
 
     @IBAction func playFastAudio(sender: UIButton) {
-        audioPlayer.stop()
+        stopAllAudio()
+        audioPlayer.currentTime = 0.0
         audioPlayer.rate=2.0
         audioPlayer.play()
     }
+ 
+    @IBAction func stopAudio(sender: UIButton) {
+        stopAllAudio()
+    }
+ 
     
-    
-    @IBAction func stopAllAudio(sender: UIButton) {
+    func stopAllAudio(){
         audioPlayer.stop()
+        audioEngine.stop()
+        audioEngine.reset()
     }
     
     @IBAction func playChipmunkAudio(sender: UIButton) {
+        stopAllAudio()
         playAudioWithVariablePitch(1000)
     }
     
     func playAudioWithVariablePitch(pitch: Float){
-        audioPlayer.stop()
-        audioEngine.stop()
-        audioEngine.reset()
-        
+        stopAllAudio()
         var audioPlayerNode = AVAudioPlayerNode()
         audioEngine.attachNode(audioPlayerNode)
         

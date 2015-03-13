@@ -23,6 +23,9 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     override func viewWillAppear(animated: Bool) {
         stopButton.hidden = true
         recordButton.enabled=true
+        recordingInProgress.text = "Tap to record"
+        recordingInProgress.hidden=false
+        
     }
     
     @IBAction func stopAudio(sender: UIButton) {
@@ -41,11 +44,12 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     @IBAction func recordAudio(sender: UIButton) {
         
         stopButton.hidden = false
-        recordingInProgress.hidden=false
+        recordingInProgress.hidden = false
+        recordingInProgress.text = "Recording"
         recordButton.enabled=false
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
@@ -64,22 +68,20 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         audioRecorder.delegate = self
         audioRecorder.meteringEnabled = true
         audioRecorder.record()
-       
+        
     }
-
+    
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!, successfully flag: Bool){
-            if(flag){
-            recordedAudio = RecordedAudio()
-            recordedAudio.filePathUrl = recorder.url
-            recordedAudio.title = recorder.url.lastPathComponent
-            
+        if(flag){
+            recordedAudio = RecordedAudio(filePathUrl : recorder.url, title : recorder.url.lastPathComponent!)
             self.performSegueWithIdentifier("stopRecording", sender: recordedAudio)
-            } else {
-                println("Recording was not successful")
-                recordButton.enabled=true
-                stopButton.hidden=true
-                    }
+        } else {
+            println("Recording was not successful")
+            recordButton.enabled=true
+            stopButton.hidden=true
         }
+    }
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if(segue.identifier == "stopRecording"){
             let playSoundsVC:PlaySoundsViewController = segue.destinationViewController as
