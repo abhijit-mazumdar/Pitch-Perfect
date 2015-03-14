@@ -11,6 +11,8 @@ import AVFoundation
 
 class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
 
+    var hasGivenRecordingPermission:Bool = false
+    
     var audioRecorder:AVAudioRecorder!
     var recordedAudio:RecordedAudio!
     
@@ -36,8 +38,12 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        		
+        // Ask for user user permission to record
+        var session = AVAudioSession.sharedInstance()
+        session.requestRecordPermission({(response: Bool) in
+            self.hasGivenRecordingPermission = response
+            }
+        )
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,6 +51,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         // Dispose of any resources that can be recreated.
     }
     
+    // Records the audio after setting file name and location of the generated sound file
     @IBAction func recordAudio(sender: UIButton) {
         
         stopButton.hidden = false
@@ -52,25 +59,42 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         recordingInProgress.text = "Recording"
         recordButton.enabled=false
         
-        let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        //Check if user gave permission
         
-        let currentDateTime = NSDate()
-        let formatter = NSDateFormatter()
-        formatter.dateFormat = "ddMMyyyy-HHmmss"
-        let recordingName = formatter.stringFromDate(currentDateTime)+".wav"
-        let pathArray = [dirPath, recordingName]
-        let filePath = NSURL.fileURLWithPathComponents(pathArray)
-        
-        var session = AVAudioSession.sharedInstance()
-        session.setCategory(AVAudioSessionCategoryPlayAndRecord, error: nil)
-        
-        audioRecorder = AVAudioRecorder(URL: filePath, settings: nil, error: nil)
-        audioRecorder.delegate = self
-        audioRecorder.meteringEnabled = true
-        audioRecorder.record()
-        
+        if (hasGivenRecordingPermission)  {
+            let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+            
+            let currentDateTime = NSDate()
+            let formatter = NSDateFormatter()
+            formatter.dateFormat = "ddMMyyyy-HHmmss"
+            let recordingName = formatter.stringFromDate(currentDateTime)+".wav"
+            let pathArray = [dirPath, recordingName]
+            let filePath = NSURL.fileURLWithPathComponents(pathArray)
+            
+            var session = AVAudioSession.sharedInstance()
+            session.setCategory(AVAudioSessionCategoryPlayAndRecord, error: nil)
+            
+            var error: NSError?
+            audioRecorder = AVAudioRecorder(URL: filePath, settings: nil, error: nil)
+            if let e = error {
+                //(do error handling)
+                println(e.description)
+            } else {
+                
+                audioRecorder.delegate = self
+                audioRecorder.meteringEnabled = true
+                audioRecorder.record()
+            }
+        } else {
+            
+            var alertViewController = UIAlertController(title: "No Permission", message: "You didn't give us permission to record!", preferredStyle: UIAlertControllerStyle.Alert)
+            var alertAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil)
+            alertViewController.addAction(alertAction)
+            self.presentViewController(alertViewController, animated: true, completion: nil)
+        }
     }
     
+
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!, successfully flag: Bool){
         if(flag){
             recordedAudio = RecordedAudio(filePathUrl : recorder.url, title : recorder.url.lastPathComponent!)
@@ -81,6 +105,8 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
             stopButton.hidden=true
         }
     }
+    
+    //Get the recorded data and pass it along to the next screen
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if(segue.identifier == "stopRecording"){
