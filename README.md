@@ -1,2 +1,2 @@
 # Pitch-Perfect
-iOS app in Swift to record voice and play it back.
+iOS app in Swift that allows users to record their voice and will then modulate the recorded audio to sound like a Chipmunk or Darth Vader. This app will also let the user speed up or slow down the rate of playback.
