@@ -62,7 +62,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         //Check if user gave permission
         
         if (hasGivenRecordingPermission)  {
-            let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+            let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
             
             let currentDateTime = NSDate()
             let formatter = NSDateFormatter()
@@ -110,9 +110,9 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if(segue.identifier == "stopRecording"){
-            let playSoundsVC:PlaySoundsViewController = segue.destinationViewController as
+            let playSoundsVC:PlaySoundsViewController = segue.destinationViewController as!
             PlaySoundsViewController
-            let data = sender as RecordedAudio
+            let data = sender as! RecordedAudio
             playSoundsVC.receivedAudio = data
         }
     }
